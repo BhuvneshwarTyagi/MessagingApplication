@@ -44,7 +44,7 @@ router.post("", async (req, res) => {
                 resolve(fetchedUser);
             });
         });
-        console.log(fetchedUserResult)
+        
         if (!fetchedUserResult) {
             return res.status(404).json({ message: "No user found with this email." });
         }
@@ -58,7 +58,14 @@ router.post("", async (req, res) => {
         }
         
         delete fetchedUserResult.password;
-
+        const query = 'UPDATE users SET status = ? WHERE id = ?';
+        connection.query(query, ['Online', fetchedUserResult.id], (error) => {
+            if (error) {
+                res.status(500).json({ error: 'Database update error' });
+            } else {
+                res.status(200).json({ message: 'User logged in and status set to online' });
+            }
+        });
         
         const tokenData = {
             email,

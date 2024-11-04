@@ -90,6 +90,7 @@ const createUsersTable = () => {
           phone VARCHAR(10),
           institution VARCHAR(20),
           role ENUM('Teacher', 'Student', 'Institute') NOT NULL,
+          status ENUM('Online', 'Offline') NOT NULL DEFAULT 'Offline',
           password VARCHAR(255) NOT NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
