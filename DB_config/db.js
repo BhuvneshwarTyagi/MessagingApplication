@@ -2,31 +2,15 @@ const mysql = require('mysql');
 const dotenv = require('dotenv');
 dotenv.config();
 
-
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
 });
 
-
-const checkDatabaseExists = (dbName) => {
-  return new Promise((resolve, reject) => {
-    const sql = `
-      SELECT SCHEMA_NAME 
-      FROM information_schema.SCHEMATA 
-      WHERE SCHEMA_NAME = ?`;
-    connection.query(sql, [dbName], (error, results) => {
-      if (error) return reject(error);
-      resolve(results.length > 0);
-    });
-  });
-};
-
-
 const createDatabase = (dbName) => {
   return new Promise((resolve, reject) => {
-    const sql = `CREATE DATABASE ??`;
+    const sql = `CREATE DATABASE IF NOT EXISTS ??`;
     connection.query(sql, [dbName], (error) => {
       if (error) return reject(error);
       console.log(`Database ${dbName} created.`);
@@ -48,12 +32,9 @@ const changeDatabase = (dbName) => {
 
 const setupDatabase = async (dbName) => {
   try {
-    const dbExists = await checkDatabaseExists(dbName);
-    if (!dbExists) {
+
       await createDatabase(dbName);
-    } else {
-      console.log(`Database ${dbName} already exists.`);
-    }
+    
 
     await changeDatabase(dbName);
 
@@ -62,27 +43,9 @@ const setupDatabase = async (dbName) => {
   }
 };
 
-
-const checkUsersTable = (tableName) => {
-  return new Promise((resolve, reject) => {
-      const sql = `
-      SELECT COUNT(*)
-      FROM information_schema.tables 
-      WHERE table_schema = 'MessagingApplication' 
-      AND table_name = ?`;
-
-      connection.query(sql, [tableName], (error, results) => {
-          if (error) return reject(error);
-          const tableExists = results[0]['COUNT(*)'] > 0;
-          console.log(`Table ${tableName} exists: ${tableExists}`);
-          resolve(tableExists);
-      });
-  });
-}
-
 const createUsersTable = () => {
   return new Promise((resolve, reject) => {
-      const sql = `
+    const sql = `
       CREATE TABLE IF NOT EXISTS users (
           id INT AUTO_INCREMENT PRIMARY KEY,
           name VARCHAR(255) NOT NULL,
@@ -93,8 +56,31 @@ const createUsersTable = () => {
           status ENUM('Online', 'Offline') NOT NULL DEFAULT 'Offline',
           password VARCHAR(255) NOT NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 
+      )`;
+
+    connection.query(sql, (err, result) => {
+      if (err) return reject(err);
+      resolve(true);
+    });
+  });
+}
+
+const createMessagingTable = () => {
+  return new Promise((resolve, reject) => {
+      const sql = `
+      CREATE TABLE IF NOT EXISTS chat_channels (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          chat_channel VARCHAR(255) NOT NULL UNIQUE,
+          user1_id INT NOT NULL,
+          user2_id INT NOT NULL,
+          last_msg TEXT DEFAULT NULL,
+          sender INT DEFAULT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          FOREIGN KEY (user1_id) REFERENCES users(id),
+          FOREIGN KEY (user2_id) REFERENCES users(id)
       )`;
 
       connection.query(sql, (err, result) => {
@@ -103,13 +89,12 @@ const createUsersTable = () => {
       });
   });
 }
+
 const setupTables = async () => {
   try {
-    const check = await checkUsersTable('users');
-    
-    if (!check) {
-      await createUsersTable();
-    }
+    await createUsersTable();
+    await createMessagingTable();
+
   } catch (error) {
     console.error('Error setting up the database:', error);
   }
@@ -122,7 +107,7 @@ connection.connect(async (err) => {
   }
   console.log("Database connected!");
 
-  
+
   const dbName = process.env.DB_DATABASE;
   console.log(dbName);
   await setupDatabase(dbName);

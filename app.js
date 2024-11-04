@@ -5,7 +5,9 @@ const rateLimit = require("express-rate-limit");
 const http = require("http");
 const socketIo = require("socket.io");
 const connection = require("./DB_config/db");
-const initializeSocket = require("./chat_routes/status_web_socket");
+const initializeStatusSocket = require("./chat_routes/Sockets/status");
+const initializeChatSocket = require("./chat_routes/Sockets/chat");
+
 
 // Initialize Express app and HTTP server
 const app = express();
@@ -35,12 +37,18 @@ app.use(cors({
 // Routes import and usage
 const login = require("./Auth_routes/login");
 const signup = require("./Auth_routes/signup");
+const updateUser = require("./Auth_routes/updateUserData");
+
 
 
 app.use("/login", login);
 app.use("/signup", signup);
+app.use("/updateuser", updateUser);
+app.use(express.static('public'));
 
-initializeSocket(io, connection);
+initializeStatusSocket(io, connection);
+initializeChatSocket(io, connection);
+
 
 // Start the server for web Socket
 const PORT = 3000;

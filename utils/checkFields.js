@@ -22,4 +22,13 @@ const checkFields = (fields) => {
     return true; // returns true if all fields are valid
 };
 
-module.exports = checkFields;
+const checkUserExists = (userId,connection) => {
+    return new Promise((resolve, reject) => {
+        const sql = `SELECT COUNT(*) AS count FROM users WHERE id = ?`;
+        connection.query(sql, [userId], (err, results) => {
+            if (err) return reject(err);
+            resolve(results[0].count > 0);
+        });
+    });
+};
+module.exports = {checkFields,checkUserExists};
