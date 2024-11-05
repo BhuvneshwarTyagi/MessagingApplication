@@ -1,158 +1,227 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.jpg';
+import { Eye, EyeOff, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import logo from './../assets/logo.jpg'
 
-function SignUp() {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
-    const [role, setRole] = useState('');
-    const [institution, setInstitution] = useState('');
-    const [password, setPassword] = useState('');
+const SignUp = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    role: '',
+    institution: '',
+    password: ''
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
-    const handleSubmit = (e) => {
-        e.preventDefault();
-       
-        let data = JSON.stringify({
-            "name": name,
-            "email": email,
-            "phone": phone,
-            "role": role,
-            "institution": institution,
-            "password": password
-        });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (name === 'password') {
+      // Calculate password strength
+      let strength = 0;
+      if (value.length >= 8) strength++;
+      if (value.match(/[A-Z]/)) strength++;
+      if (value.match(/[0-9]/)) strength++;
+      if (value.match(/[^A-Za-z0-9]/)) strength++;
+      setPasswordStrength(strength);
+    }
+  };
 
-        let config = {
-            method: 'post',
-            maxBodyLength: Infinity,
-            url: 'http://localhost:3000/signup',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            data: data
-        };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-        axios.request(config)
-            .then((response) => {
-                toast.success("Sign up Successfull");
-                navigate('/login')
-            })
-            .catch((error) => {
-                console.log(error);
-                toast.error(error.response.data.message);
-            });
+    try {
+      const response = await axios.post('http://localhost:3000/signup', formData, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      toast.success("Sign up Successful!", {
+        icon: <CheckCircle2 className="text-green-500" />
+      });
+      navigate('/login');
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Signup failed", {
+        icon: <AlertCircle className="text-red-500" />
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    };
-
-    return (
-        <div className="bg-gradient-to-b from-blue-400 via-blue-300 to-blue-200 w-screen h-fit overflow-y-auto py-6 flex flex-col justify-center items-center text-base">
-            <div className="bg-gradient-to-br from-indigo-400 to-blue-400 bg-opacity-60 h-fit w-1/3 rounded-3xl shadow-lg shadow-blue-100">
-                <div className="w-full h-28 bg-indigo-900 px-6 flex items-center justify-between rounded-t-3xl">
-                    <div className="relative py-4 text-white">
-                        <p className="text-xl font-medium leading-tight pb-1">Create an Account!</p>
-                        <p className="pb-3">Fill in the details below</p>
-                    </div>
-                    <img src={logo} alt="logo" className="w-20 h-20 rounded-full border-4 border-indigo-900 border-opacity-5" />
-                </div>
-
-                <div className="mt-6 mx-6 text-lg">
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                            <label htmlFor="name" className="block mb-1 text-white">Name</label>
-                            <input
-                                type="text"
-                                id="name"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                                placeholder="Enter your name"
-                                className="bg-white placeholder-black w-full border hover:border-blue-200 rounded-xl py-1 pl-2 shadow-sm hover:shadow-blue-200"
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="email" className="block mb-1 text-white">Email</label>
-                            <input
-                                type="email"
-                                id="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                placeholder="Enter your email"
-                                className="bg-white placeholder-black w-full border hover:border-blue-200 rounded-xl py-1 pl-2 shadow-sm hover:shadow-blue-200"
-
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="phone" className="block mb-1 text-white">Phone Number</label>
-                            <input
-                                type="tel"
-                                id="phone"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                required
-                                placeholder="Enter your phone number"
-                                className="bg-white placeholder-black w-full border hover:border-blue-200 rounded-xl py-1 pl-2 shadow-sm hover:shadow-blue-200"
-
-                            />
-                        </div>
-                        <div className='rounded-lg'>
-                            <label htmlFor="role" className="block mb-1 text-white">Role</label>
-                            <select
-                                id="role"
-                                value={role}
-                                onChange={(e) => setRole(e.target.value)}
-                                required
-                                className="bg-white placeholder-text w-full border hover:border-blue-200 rounded-xl py-1 pl-2 shadow-sm hovwer:shadow-blue-200"
-                            >
-                                <option value="" disabled>Select a role</option>
-                                <option value="teacher">Teacher</option>
-                                <option value="student">Student</option>
-                                <option value="institute">Institute</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label htmlFor="institution" className="block mb-1 text-white">Institution</label>
-                            <input
-                                type="text"
-                                id="institution"
-                                value={institution}
-                                onChange={(e) => setInstitution(e.target.value)}
-                                required
-                                placeholder="Enter your institution name"
-                                className="bg-white placeholder-black w-full border hover:border-blue-200 rounded-xl py-1 pl-2 shadow-sm hover:shadow-blue-200"
-
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="password" className="block mb-1 text-white">Password</label>
-                            <input
-                                type="password"
-                                id="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                placeholder="Enter password"
-                                className="bg-white placeholder-black w-full border hover:border-blue-200 rounded-xl py-1 pl-2 shadow-sm hover:shadow-blue-200"
-
-                            />
-                        </div>
-                        <button type="submit" className="w-full py-2 bg-indigo-500 rounded-xl shadow-md border border-indigo-500 hover:border-indigo-500 hover:bg-indigo-600">
-                            <p className="text-white font-medium mx-auto">Sign up</p>
-                        </button>
-                    </form>
-                    <p className="mt-4 cursor-pointer text-black text-center py-3">
-                        Already have an account?{' '}
-                        <Link to="/" className="text-white hover:text-blue-900 font-medium">
-                            LogIn
-                        </Link>
-                    </p>
-                </div>
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-500 via-blue-400 to-blue-300 p-6">
+      <div className="max-w-3xl mx-auto">
+        {/* Card Container */}
+        <div className="bg-white bg-opacity-10 rounded-3xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition-all duration-300">
+          {/* Header */}
+          <div className="bg-indigo-900 p-6 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 to-blue-800"></div>
+            <div className="relative z-10 flex justify-between items-center">
+              <div>
+                <h1 className="text-2xl font-bold text-white mb-2">Create Account</h1>
+                <p className="text-blue-200">Join our community today</p>
+              </div>
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg">
+                <img src={logo} alt="logo" className="w-16 h-16 rounded-full object-cover" />
+              </div>
             </div>
+          </div>
+
+          {/* Form */}
+          <div className="p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Name Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white">Full Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 rounded-xl bg-white border border-white border-opacity-20 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-black placeholder-gray-500 transition-all duration-300"
+                  placeholder="Enter your name"
+                  required
+                />
+              </div>
+
+              {/* Email Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white">Email Address</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 rounded-xl bg-white border border-white border-opacity-20 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-black placeholder-gray-500 transition-all duration-300"
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+
+              {/* Phone Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white">Phone Number</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 rounded-xl bg-white border border-white border-opacity-20 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-black placeholder-gray-500 transition-all duration-300"
+                  placeholder="Enter your phone number"
+                  required
+                />
+              </div>
+
+              {/* Role Selection */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white">Role</label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 rounded-xl bg-white  border border-white border-opacity-20 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-grey-500 transition-all duration-300"
+                  required
+                >
+                  <option value="" className="text-gray-900">Select a role</option>
+                  <option value="teacher" className="text-gray-900">Teacher</option>
+                  <option value="student" className="text-gray-900">Student</option>
+                  <option value="institute" className="text-gray-900">Institute</option>
+                </select>
+              </div>
+
+              {/* Institution Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white">Institution</label>
+                <input
+                  type="text"
+                  name="institution"
+                  value={formData.institution}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 rounded-xl bg-white border border-white border-opacity-20 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-black placeholder-gray-500 transition-all duration-300"
+                  placeholder="Enter your institution"
+                  required
+                />
+              </div>
+
+              {/* Password Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-xl bg-white border border-white border-opacity-20 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-whblacklaceholder-gray-305 transition-all duration-300"
+                    placeholder="Create a password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:text-blue-200 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+                {/* Password Strength Indicator */}
+                <div className="flex gap-1 mt-2">
+                  {[...Array(4)].map((_, index) => (
+                    <div
+                      key={index}
+                      className={`h-1 w-full rounded-full transition-all duration-300 ${
+                        index < passwordStrength
+                          ? passwordStrength === 1
+                            ? 'bg-red-500'
+                            : passwordStrength === 2
+                            ? 'bg-yellow-500'
+                            : passwordStrength === 3
+                            ? 'bg-blue-500'
+                            : 'bg-green-500'
+                          : 'bg-gray-300'
+                      }`}
+                    ></div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                ) : (
+                  'Create Account'
+                )}
+              </button>
+            </form>
+
+            {/* Login Link */}
+            <p className="mt-6 text-center">
+              Already have an account?{' '}
+              <Link
+                to="/login"
+                className="font-medium text-blue-600 hover:text-blue-100 hover:underline transition-all duration-300"
+              >
+                Log in
+              </Link>
+            </p>
+          </div>
         </div>
-    );
-}
+      </div>
+    </div>
+  );
+};
 
 export default SignUp;

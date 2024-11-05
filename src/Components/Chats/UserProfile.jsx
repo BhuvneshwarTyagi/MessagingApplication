@@ -56,7 +56,7 @@ function UserProfile() {
       let config = {
         method: 'get',
         maxBodyLength: Infinity,
-        url: 'http://localhost:3000/search/user?id=1',
+        url: `http://localhost:3000/search/user?id=${userId}`,
         headers: {
           'Authorization': `Bearer ${authState.accessToken}`
         }

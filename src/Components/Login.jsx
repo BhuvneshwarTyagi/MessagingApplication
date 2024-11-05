@@ -1,99 +1,149 @@
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.jpg';
-import loginImage from '../assets/login_page.png';
+import { Eye, EyeOff, Loader2, LogIn } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import AuthContext from "../Context/AuthContext";
-function Login() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const navigate = useNavigate();
-    const { login } = useContext(AuthContext);
+import logo from './../assets/logo.jpg'
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        let data = JSON.stringify({
-            "email": email,
-            "password": password
-        });
+const Login = () => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
-        let config = {
-            method: 'post',
-            maxBodyLength: Infinity,
-            url: 'http://localhost:3000/login',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            data: data
-        };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
-        axios.request(config)
-            .then((response) => {
-                console.log(response.data)
-                login(response.data.user, response.data.tokens);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-                navigate('/chat')
-            })
-            .catch((error) => {
-                console.log(error)
-                toast.error(error.response.data.error);
-            });
+    try {
+      const response = await axios.post('http://localhost:3000/login', formData, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      login(response.data.user, response.data.tokens);
+      navigate('/chat');
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-
-    };
-
-    return (
-        <div className="bg-gradient-to-b from-blue-400 via-blue-300 to-blue-200 w-screen h-screen flex flex-col gap-8 justify-center items-center text-base">
-            <div className="bg-gradient-to-br from-indigo-400 to-blue-400 bg-opacity-60 h-2/3 w-1/3 rounded-3xl shadow-lg shadow-blue-100">
-                <div className="w-full h-28 bg-indigo-900 px-6 flex justify-between rounded-t-3xl">
-                    <div className="relative py-4 text-white">
-                        <p className="text-xl font-medium leading-tight pb-1">Welcome Back!</p>
-                        <p className="pb-3">Sign in to continue</p>
-                        <img src={logo} className="w-20 h-20 rounded-full absolute border-4 border-indigo-900 border-opacity-5" alt="Logo" />
-                    </div>
-                    <img src={loginImage} alt="Login illustration" className="h-full" />
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-500 via-blue-400 to-blue-300 p-6 flex items-center justify-center">
+      <div className="w-full max-w-md">
+        {/* Card Container */}
+        <div className="bg-white bg-opacity-10 rounded-3xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition-all duration-300">
+          {/* Header */}
+          <div className="bg-indigo-900 p-6 relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 to-blue-800 opacity-90"></div>
+            
+            {/* Content */}
+            <div className="relative z-10 flex justify-between items-center">
+              <div className="space-y-1">
+                <h1 className="text-2xl font-bold text-white">Welcome Back!</h1>
+                <p className="text-blue-200">Sign in to continue</p>
+              </div>
+              
+              {/* Logo Container */}
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg transform hover:rotate-12 transition-transform duration-300">
+                  <img src={logo} alt="logo" className="w-12 h-12 rounded-full" />
                 </div>
-                <div className="mt-16 mx-6 text-lg text-white">
-                    <form onSubmit={handleSubmit} className="mt-6">
-                        <label htmlFor="email" className="block mb-1">Email</label>
-                        <input
-                            type="email"
-                            id="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Enter email"
-                            className="bg-transparent placeholder-white w-full border border-white rounded-xl py-1 pl-2 shadow-sm shadow-primary"
-                            required
-                        />
-                        <label htmlFor="password" className="block mt-2 mb-1">Password</label>
-                        <input
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Enter password"
-                            className="bg-transparent placeholder-white w-full border border-white rounded-xl py-1 pl-2 shadow-sm shadow-primary"
-                            required
-                        />
-                        <label className="block">
-                            <input type="checkbox" className="mt-4 mb-6 mr-2 rounded-full" />
-                            Remember me
-                        </label>
-                        <button type="submit" className="w-full py-2 bg-indigo-500 rounded-xl shadow-md border border-indigo-500 hover:border-indigo-500 hover:bg-indigo-600">
-                            <p className="text-white font-medium mx-auto">Log in</p>
-                        </button>
-                    </form>
-                    <p className="text-lg text-black text-center py-2">
-                        Don't have an account? &nbsp;
-                        <Link to="/signup" className="text-white hover:underline">
-                            SignUp
-                        </Link>
-                    </p>
-                </div>
+              </div>
             </div>
+            
+            {/* Login Image */}
+            <div className="mt-4 flex justify-center">
+              <img src={logo} alt="Login illustration" className="max-h-24 object-contain" />
+            </div>
+          </div>
+
+          {/* Form Section */}
+          <div className="p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Email Field */}
+              <div className="space-y-2">
+                <label className="text-lg font-medium text-white">Email Address</label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-xl bg-white  border border-white border-opacity-20 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-black placeholder-gray-500 transition-all duration-300"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div className="space-y-2">
+                <label className="text-lg font-medium text-white">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-xl bg-white  border border-white border-opacity-20 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-black placeholder-gray-500 transition-all duration-300"
+                    placeholder="Enter your password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:text-blue-200 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+              </div>
+
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              >
+                {loading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    <LogIn className="w-5 h-5" />
+                    <span>Log in</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Sign Up Link */}
+            <p className="mt-6 text-center ">
+              Don't have an account?{' '}
+              <Link
+                to="/signup"
+                className="font-medium text-blue-600 hover:text-blue-100 hover:underline transition-all duration-300"
+              >
+                Sign up
+              </Link>
+            </p>
+          </div>
         </div>
-    );
-}
+      </div>
+    </div>
+  );
+};
 
 export default Login;
