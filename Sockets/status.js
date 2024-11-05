@@ -1,7 +1,9 @@
-const { checkUserExists } = require('./../../utils/checkFields');
+const { checkUserExists } = require('../utils/checkFields');
+const { extractTokenSocket } = require('../utils/jwt');
 
 function initializeStatusSocket(io, db) {
     const statusNamespace = io.of("/status");
+    statusNamespace.use(extractTokenSocket);
 
     statusNamespace.on("connection", async (socket) => {
         const by = socket.handshake.query.by;

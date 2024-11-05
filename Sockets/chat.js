@@ -1,17 +1,19 @@
-const { createChatChannel } = require('./../../DB_config/create_tables');
-const connection = require('./../../DB_config/db');
-const { checkUserExists } = require('./../../utils/checkFields');
+const { createChatChannel } = require('../DB_config/create_tables');
+const connection = require('../DB_config/db');
+const { checkUserExists } = require('../utils/checkFields');
+const { extractTokenSocket } = require('../utils/jwt');
 
 function initializeChatSocket(io, db) {
     const chatNamespace = io.of('/chat');
-    
+
     // Track active users and their channels
     const activeUsers = new Map();
     const userChannels = new Map();
 
+    chatNamespace.use(extractTokenSocket);
     chatNamespace.on('connection', async (socket) => {
         console.log('A user connected to chat:', socket.id);
-        
+
         // Handle user joining with their ID and channel
         socket.on('userJoined', ({ userId, chatChannel }) => {
             activeUsers.set(socket.id, userId);
@@ -34,7 +36,7 @@ function initializeChatSocket(io, db) {
             socket.leave(channel);
             userChannels.delete(socket.id);
         });
-        
+
         socket.on('fetchInitialMessages', async (chatChannel) => {
             const sql = `
                 SELECT m.*, 
@@ -44,7 +46,7 @@ function initializeChatSocket(io, db) {
                 LEFT JOIN ?? r ON m.reply_to = r.id
                 ORDER BY m.created_at DESC 
                 LIMIT 50`;
-        
+
             try {
                 const result = await new Promise((resolve, reject) => {
                     connection.query(sql, [chatChannel, chatChannel], (err, result) => {
@@ -55,7 +57,7 @@ function initializeChatSocket(io, db) {
                         }
                     });
                 });
-        
+
                 socket.emit('initialMessages', result);
             } catch (error) {
                 console.error('Error fetching initial messages:', error);
@@ -72,8 +74,10 @@ function initializeChatSocket(io, db) {
             }
 
             try {
+                console.log(data);
+
                 await createChatChannel(data.chat_channel, sender_id, data.user2_id);
-                
+
                 // If this is a reply, verify the replied-to message exists
                 if (data.reply_to) {
                     const replyExists = await checkMessageExists(data.chat_channel, data.reply_to);
@@ -82,15 +86,15 @@ function initializeChatSocket(io, db) {
                         return;
                     }
                 }
-                
+
                 const savedMessage = await saveMessageToDatabase(sender_id, data.chat_channel, data.message, data.reply_to);
-                
+
                 // Fetch the reply message details if this is a reply
                 let replyDetails = null;
                 if (data.reply_to) {
                     replyDetails = await getMessageById(data.chat_channel, data.reply_to);
                 }
-                
+
                 // Emit to the specific channel with reply details
                 chatNamespace.to(data.chat_channel).emit('receiveMessage', {
                     ...data,
@@ -174,7 +178,7 @@ const markMessageAsSeen = async (chat_channel, message_id, user_id) => {
             INSERT INTO message_seen (message_id, user_id, chat_channel)
             VALUES (?, ?, ?)
             ON DUPLICATE KEY UPDATE seen_at = CURRENT_TIMESTAMP`;
-            
+
         connection.query(sql, [message_id, user_id, chat_channel], (err, result) => {
             if (err) return reject(err);
             resolve(result);
@@ -194,7 +198,7 @@ const markAllMessagesSeen = async (chat_channel, user_id) => {
                 FROM message_seen 
                 WHERE user_id = ?
             )`;
-            
+
         connection.query(sql, [user_id, chat_channel, chat_channel, user_id, user_id], (err, result) => {
             if (err) return reject(err);
             resolve(result);

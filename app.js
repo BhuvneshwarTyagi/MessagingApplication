@@ -5,8 +5,10 @@ const rateLimit = require("express-rate-limit");
 const http = require("http");
 const socketIo = require("socket.io");
 const connection = require("./DB_config/db");
-const initializeStatusSocket = require("./chat_routes/Sockets/status");
-const initializeChatSocket = require("./chat_routes/Sockets/chat");
+const initializeStatusSocket = require("./Sockets/status");
+const initializeChatSocket = require("./Sockets/chat");
+const initializeChannelsSocket  = require("./Sockets/chatChannel");
+const { extractToken } = require("./utils/jwt");
 
 
 // Initialize Express app and HTTP server
@@ -34,24 +36,28 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({
     origin: '*', 
 }));
+app.use(extractToken);
 
 
 // Routes import and usage
 const login = require("./Auth_routes/login");
 const signup = require("./Auth_routes/signup");
 const updateUser = require("./Auth_routes/updateUserData");
-const messages = require('./chat_routes/routes');
+const searchUsers = require('./Auth_routes/searchUsers');
+
 
 
 app.use("/login", login);
 app.use("/signup", signup);
 app.use("/updateuser", updateUser);
-app.use("/fetch", messages);
+app.use("/search", searchUsers);
 
 app.use(express.static('public'));
 
 initializeStatusSocket(io, connection);
 initializeChatSocket(io, connection);
+initializeChannelsSocket(io, connection);
+
 
 
 // Start the server for web Socket
