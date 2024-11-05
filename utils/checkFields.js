@@ -6,7 +6,7 @@ const checkFields = (fields) => {
         }
 
         // Additional checks for specific fields
-        if (key === 'email') {
+        if (key === 'Email') {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(fields[key])) {
                 throw new Error("Invalid email format.");
