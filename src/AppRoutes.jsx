@@ -1,4 +1,3 @@
-// AppRoutes.jsx
 import React, { useContext } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Login from './Components/Login';
@@ -18,8 +17,6 @@ function AppRoutes({ selectedUser, onUserSelect }) {
       <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
-
-      {/* Protecting Chat and Profile routes */}
       <Route 
         path="/chat" 
         element={

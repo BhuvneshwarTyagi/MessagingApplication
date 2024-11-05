@@ -19,7 +19,7 @@ const ChatScreen = ({selectedUser, onUserSelect,currentUserId}) => {
 
   return (
     <div className="flex h-screen w-screen">
-      {/* Sidebar - Full width on mobile when chat is not shown */}
+   
       <div
         className={`
           ${showChat ? 'hidden md:block' : 'w-full md:w-auto'} 
@@ -40,7 +40,6 @@ const ChatScreen = ({selectedUser, onUserSelect,currentUserId}) => {
         </div>
       </div>
 
-      {/* Chat Window - Full width on mobile when shown */}
       {selectedUser && (
         <div 
           className={`
@@ -66,7 +65,7 @@ const ChatScreen = ({selectedUser, onUserSelect,currentUserId}) => {
         </div>
       )}
 
-      {/* Background Image - Only shown when no chat is selected on larger screens */}
+   
       {!selectedUser && (
         <EmptyChatState onUserSelect={onUserSelect}/>
       )}

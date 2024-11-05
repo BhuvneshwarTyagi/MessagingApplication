@@ -5,10 +5,6 @@ import AuthContext from '../../Context/AuthContext';
 import ChatHeader from './ChatHeader';
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
-
-
-// Updated Message Component with reply functionality
-
 const Message = ({ 
   message, 
   isSent, 
@@ -50,7 +46,7 @@ const Message = ({
           rounded-2xl p-2 md:p-4 shadow-md hover:shadow-lg transition-all duration-300 relative
           ${isNew ? (isSent ? 'animate-slide-left' : 'animate-slide-right') : ""}`}
       >
-        {/* Reply indicator with click to scroll */}
+
         {repliedMessage && (
           <div 
             onClick={() => onClick(replyTo)}
@@ -92,7 +88,7 @@ const Message = ({
   );
 };
 
-// Updated MessageInput Component with reply functionality
+
 const MessageInput = ({ onSendMessage, replyingTo, onCancelReply }) => {
   const [message, setMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -183,7 +179,7 @@ function ChatWindow({ user }) {
       'authorization': `Bearer ${authState.accessToken}` // Add your authorization header
     }
   });
-  // Enhanced scroll to bottom functionality
+
   const scrollToBottom = (smooth = true) => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({
@@ -223,7 +219,7 @@ function ChatWindow({ user }) {
     }
   }, []);
 
-  // Main socket effect
+
   useEffect(() => {
     chatChannel.current = `chat_channel_${Math.min(currentUserId, user.id)}_${Math.max(currentUserId, user.id)}`;
     
@@ -244,7 +240,7 @@ function ChatWindow({ user }) {
           .map(msg => msg.id)
         );
         setSeenMessages(seenMsgs);
-        // Scroll to bottom after loading initial messages
+        
         setTimeout(() => scrollToBottom(false), 100);
       }
     });
@@ -275,7 +271,7 @@ function ChatWindow({ user }) {
       }
     });
 
-    // ... (keep existing socket event handlers)
+  
 
     return () => {
       socket.emit('leaveChannel', chatChannel.current);

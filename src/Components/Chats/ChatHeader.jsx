@@ -1,5 +1,4 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { Phone, Video, MoreVertical } from 'lucide-react';
 import io from 'socket.io-client';
 import AuthContext from './../../Context/AuthContext';
 import { Link } from 'react-router-dom';
@@ -14,12 +13,12 @@ function ChatHeader({ user }) {
     let isComponentMounted = true;
 
     const initializeSocket = () => {
-      // Clean up existing socket if it exists
+
       if (socketRef.current) {
         socketRef.current.disconnect();
       }
 
-      // Only initialize if we have both user.id and authState.userDetails.id
+  
       if (!user?.id || !authState?.userDetails?.id) {
         return;
       }
