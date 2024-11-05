@@ -1,6 +1,6 @@
 const checkFields = (fields) => {
     for (const key in fields) {
-        // Check if the field is present and non-empty
+
         if (!fields[key]) {
             throw new Error(`The field '${key}' is missing or empty.`);
         }
@@ -19,7 +19,7 @@ const checkFields = (fields) => {
             }
         }
     }
-    return true; // returns true if all fields are valid
+    return true; 
 };
 
 const checkUserExists = (userId,connection) => {

@@ -28,7 +28,7 @@ router.post("",async (req, res) => {
                     return resolve(null);
                 }
 
-                // Map the results to a user object
+              
                 const fetchedUser = results.map(user => ({
                     id: user.id,
                     name: user.name,

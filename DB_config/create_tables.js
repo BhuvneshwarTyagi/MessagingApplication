@@ -36,7 +36,7 @@ const createChatChannel = (chatChannel, user1_id, user2_id) => {
             });
 
 
-            // Insert new chat channel if it does not exist
+          
 
         });
     });

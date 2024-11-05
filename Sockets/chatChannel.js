@@ -82,7 +82,7 @@ function initializeChannelsSocket(io) {
 
 `;
 
-            // Replace ?? with "messages" if "messages" is the table name you want to use
+          
 
 
             connection.query(
@@ -133,12 +133,12 @@ function initializeChannelsSocket(io) {
     };
 
     return {
-        // Expose method to notify channel updates to relevant clients
+      
         notifyChannelUpdate: async (channelId) => {
             try {
-                // Fetch updated channel data
+             
                 const channelData = await fetchChannelDetails(channelId);
-                // Emit to all clients subscribed to this channel
+              
                 channelsNamespace.to(`channel:${channelId}`).emit('channelUpdate', channelData);
             } catch (error) {
                 console.error('Error notifying channel update:', error);

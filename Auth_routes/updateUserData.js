@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const connection = require('../DB_config/db'); // Adjust the path according to your project structure
+const connection = require('../DB_config/db');  
 
 router.put('/:id', (req, res) => {
     const userId = req.params.id;

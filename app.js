@@ -11,11 +11,11 @@ const initializeChannelsSocket  = require("./Sockets/chatChannel");
 const { extractToken } = require("./utils/jwt");
 
 
-// Initialize Express app and HTTP server
+// Initializing Express app and HTTP server
 const app = express();
 const server = http.createServer(app); 
 
-// Initialize Socket.IO
+// Initializing Socket.IO
 const io = socketIo(server,{
     cors: {
         origin: "*", // Allow your React app's origin
@@ -60,7 +60,7 @@ initializeChannelsSocket(io, connection);
 
 
 
-// Start the server for web Socket
+// Starting the server for web Socket
 const PORT = 3000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

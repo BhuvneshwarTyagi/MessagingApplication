@@ -76,11 +76,11 @@ const extractTokenSocket = (socket, next) => {
 
 const verifyAccessToken = (token) => {
 
-    //checking for provided token 
+   
     if (!token) {
         return { valid: false, };
     }
-    // verify token 
+
     return jwt.verify(token, ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
             return { valid: false};
