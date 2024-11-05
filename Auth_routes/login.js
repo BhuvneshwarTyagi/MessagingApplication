@@ -3,7 +3,7 @@ const router = express.Router();
 const { createRefreshToken, createAccessToken } = require("./../utils/jwt");
 const { verifyHashedPassword } = require('./../utils/password_hashing');
 const connection = require('./../DB_config/db');
-const checkFields = require("../utils/checkFields");
+const {checkFields} = require("../utils/checkFields");
 
 router.post("", async (req, res) => {
     try {
@@ -62,8 +62,6 @@ router.post("", async (req, res) => {
         connection.query(query, ['Online', fetchedUserResult.id], (error) => {
             if (error) {
                 res.status(500).json({ error: 'Database update error' });
-            } else {
-                res.status(200).json({ message: 'User logged in and status set to online' });
             }
         });
         
@@ -80,9 +78,7 @@ router.post("", async (req, res) => {
         res.status(200).json({ tokens, user: fetchedUserResult });
 
     } catch (error) {
-        res.status(400).json({
-            error: error.message,
-        });
+        res.status(400).json({error});
     }
 });
 

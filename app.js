@@ -14,7 +14,11 @@ const app = express();
 const server = http.createServer(app); 
 
 // Initialize Socket.IO
-const io = socketIo(server);
+const io = socketIo(server,{
+    cors: {
+        origin: "*", // Allow your React app's origin
+    }
+});
 
 // Rate limiter configuration
 const limiter = rateLimit({
@@ -29,8 +33,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
     origin: '*', 
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 
@@ -38,12 +40,14 @@ app.use(cors({
 const login = require("./Auth_routes/login");
 const signup = require("./Auth_routes/signup");
 const updateUser = require("./Auth_routes/updateUserData");
-
+const messages = require('./chat_routes/routes');
 
 
 app.use("/login", login);
 app.use("/signup", signup);
 app.use("/updateuser", updateUser);
+app.use("/fetch", messages);
+
 app.use(express.static('public'));
 
 initializeStatusSocket(io, connection);

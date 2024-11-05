@@ -5,9 +5,10 @@ const createChatChannel = (chatChannel, user1_id, user2_id) => {
         const checkExistsSql = `
             SELECT COUNT(*) as count FROM chat_channels 
             WHERE chat_channel = ? AND ((user1_id = ? AND user2_id = ?) or (user1_id = ? AND user2_id = ?))`;
-
+            
         connection.query(checkExistsSql, [chatChannel, user1_id, user2_id,user2_id,user1_id], (err, result) => {
             if (err) return reject(err);
+            console.log(chatChannel, user1_id, user2_id,user2_id,user1_id);
             if (result[0].count > 0) {
                 // Channel already exists, resolve the promise
                 return resolve(true);
@@ -19,7 +20,6 @@ const createChatChannel = (chatChannel, user1_id, user2_id) => {
                         message TEXT,
                         seen BOOLEAN DEFAULT FALSE,
                         reply_to INT,
-                       
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                     )`;

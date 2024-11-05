@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { hashPassword } = require("./../utils/password_hashing");
-const checkFields = require("../utils/checkFields");
+const {checkFields} = require("../utils/checkFields");
 const connection = require('./../DB_config/db');
 
 router.post("", async (req, res) => {

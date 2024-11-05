@@ -1,9 +1,9 @@
 const express=require("express");
 const router=express.Router();
 
-const status=require("./status_web_socket");
+const messages=require("./initialChatFetch");
 
-router.use("status",status);
+router.use("/messages",messages);
 
 
 
