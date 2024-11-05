@@ -7,8 +7,8 @@ import { AuthProvider } from './Context/AuthContext.jsx';
 
 createRoot(document.getElementById('root')).render(
   <AuthProvider>
+    <ToastContainer />
     <div className='w-screen h-screen overflow-x-hidden'>
-      <ToastContainer />
       <App />
     </div>
   </AuthProvider>

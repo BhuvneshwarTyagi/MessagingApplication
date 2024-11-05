@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { Phone, Video, MoreVertical } from 'lucide-react';
 import io from 'socket.io-client';
 import AuthContext from './../../Context/AuthContext';
+import { Link } from 'react-router-dom';
 
 function ChatHeader({ user }) {
   const [status, setStatus] = useState(user?.isOnline ? 'Online' : 'Offline');
@@ -30,6 +31,9 @@ function ChatHeader({ user }) {
         reconnection: true,
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
+        extraHeaders: {
+          'authorization': `Bearer ${authState.accessToken}` // Add your authorization header
+        }
       });
 
       const handleStatusUpdate = (data) => {
@@ -104,34 +108,24 @@ function ChatHeader({ user }) {
   }, [user, authState?.userDetails?.id]); 
 
   return (
-    <div className="border-b border-blue-100 bg-white backdrop-blur-lg bg-opacity-90 p-4 sticky top-0 z-10">
+    <div className="border-b border-blue-100 bg-white backdrop-blur-lg bg-opacity-90 p-2 md:p-4 sticky top-0 z-10">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-2">
           <div className="relative">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-semibold text-white bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+            <div className="md:w-12 md:h-12 w-8 h-8 rounded-full flex items-center justify-center text-lg font-semibold text-white bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
               {user?.name?.[0]}
             </div>
-            <div className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${status === 'Online' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <div className={`absolute bottom-0 right-0 md:w-4 md:h-4 w-3 h-3 rounded-full border-2 border-white ${status === 'Online' ? 'bg-green-500' : 'bg-red-500'}`}></div>
           </div>
-          <div>
+          <Link to={`/profile/${user.id}`}>
             <h3 className="font-bold text-gray-800">{user?.name}</h3>
             <span className={`text-sm ${status === 'Online' ? 'text-green-500' : 'text-red-500'} flex items-center`}>
               <span className={`w-2 h-2 rounded-full ${status === 'Online' ? 'bg-green-500' : 'bg-red-500'} mr-2 animate-pulse`}></span>
               {status === 'Online' ? 'Active now' : 'Offline'}
             </span>
-          </div>
+          </Link>
         </div>
-        <div className="flex items-center space-x-2">
-          <button className="p-3 hover:bg-blue-50 rounded-xl transition-all duration-200 group">
-            <Phone className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" />
-          </button>
-          <button className="p-3 hover:bg-blue-50 rounded-xl transition-all duration-200 group">
-            <Video className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" />
-          </button>
-          <button className="p-3 hover:bg-blue-50 rounded-xl transition-all duration-200 group">
-            <MoreVertical className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" />
-          </button>
-        </div>
+
       </div>
     </div>
   );

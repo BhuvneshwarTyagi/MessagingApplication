@@ -5,7 +5,7 @@ import AuthContext from '../../Context/AuthContext';
 import ChatHeader from './ChatHeader';
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
-const socket = io(`${SERVER_URL}/chat`);
+
 
 // Updated Message Component with reply functionality
 
@@ -44,10 +44,10 @@ const Message = ({
   };
 
   return (
-    <div className={`flex ${isSent ? 'justify-end' : 'justify-start'} mb-4 group ${isNew ? 'animate-message-appear' : ''}`}>
+    <div className={`flex ${isSent ? 'justify-end' : 'justify-start'} mb-2 md:mb-4 group ${isNew ? 'animate-message-appear' : ''}`}>
       <div
         className={`max-w-[70%] ${isSent ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white' : 'bg-white text-gray-800'} 
-          rounded-2xl p-4 shadow-md hover:shadow-lg transition-all duration-300 relative
+          rounded-2xl p-2 md:p-4 shadow-md hover:shadow-lg transition-all duration-300 relative
           ${isNew ? (isSent ? 'animate-slide-left' : 'animate-slide-right') : ""}`}
       >
         {/* Reply indicator with click to scroll */}
@@ -109,11 +109,12 @@ const MessageInput = ({ onSendMessage, replyingTo, onCancelReply }) => {
     if (message.trim()) {
       onSendMessage(message);
       setMessage('');
+      setIsTyping(false);
     }
   };
 
   return (
-    <div className="border-t border-blue-100 bg-white bg-opacity-90 backdrop-blur-lg p-4">
+    <div className="border-t border-blue-100 bg-white bg-opacity-90 backdrop-blur-lg px-2 py-1 md:p-4">
       {/* Reply preview */}
       {replyingTo && (
         <div className="flex items-center justify-between bg-gray-50 p-2 rounded-lg mb-2">
@@ -136,12 +137,7 @@ const MessageInput = ({ onSendMessage, replyingTo, onCancelReply }) => {
         </div>
       )}
       <div className="flex items-center space-x-2">
-        <button className="p-3 hover:bg-blue-50 rounded-xl transition-all duration-200">
-          <Paperclip className="w-5 h-5 text-blue-600" />
-        </button>
-        <button className="p-3 hover:bg-blue-50 rounded-xl transition-all duration-200">
-          <ImageIcon className="w-5 h-5 text-blue-600" />
-        </button>
+
         <div className="flex-1 relative">
           <input
             type="text"
@@ -179,7 +175,14 @@ function ChatWindow({ user }) {
   const chatContainerRef = useRef(null);
   
   const chatChannel = useRef(`chat_channel_${Math.min(currentUserId, user.id)}_${Math.max(currentUserId, user.id)}`);
-
+  const socket = io(`${SERVER_URL}/chat`,{
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    extraHeaders: {
+      'authorization': `Bearer ${authState.accessToken}` // Add your authorization header
+    }
+  });
   // Enhanced scroll to bottom functionality
   const scrollToBottom = (smooth = true) => {
     if (messagesEndRef.current) {
@@ -301,9 +304,10 @@ function ChatWindow({ user }) {
       message: messageText,
       reply_to: replyingTo?.id || null
     };
-
-    socket.emit('sendMessage', messageData);
+    console.log(user,"msgdata");
+    const check = socket.emit('sendMessage', messageData);
     setReplyingTo(null);
+    console.log("check",check)
   };
 
   return (
